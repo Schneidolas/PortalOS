@@ -178,7 +178,7 @@ ver           - Mostra a versão do PortalOS.
 data          - Exibe a data e hora atuais.
 limpar        - Limpa a tela do terminal.
 matrix        - Entra na Matrix.
-`, true),
+=======================================`, true),
         limpar: () => output.innerHTML = '',
         data: () => printOutput(new Date().toLocaleString('pt-BR')),
         ver: () => printOutput('PortalOS [Versão 2.2 - User Friendly]'),
