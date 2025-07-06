@@ -181,7 +181,7 @@ matrix        - Entra na Matrix.
 =======================================`, true),
         limpar: () => output.innerHTML = '',
         data: () => printOutput(new Date().toLocaleString('pt-BR')),
-        ver: () => printOutput('PortalOS [Versão 2.2 - User Friendly]'),
+        ver: () => printOutput('PortalOS [Versão 2.2]'),
         sysinfo: () => printOutput(`Informações do Sistema:\n  OS: PortalOS v2.2 (Web-based)\n  CPU: Emulated JS Core\n  RAM: (Depende do seu Navegador)\n  Usuário: Guest`),
         eco: (args) => printOutput(args.join(' ')),
         dir: () => commands.ls(),
@@ -287,7 +287,7 @@ matrix        - Entra na Matrix.
 
     inputLine.addEventListener('keydown', handleCommand);
     
-    printOutput("PortalOS [Versão 2.2 - User Friendly]");
+    printOutput("PortalOS [Versão 2.2]");
     printOutput("(c) Schneidolas Corporation. Todos os direitos reservados.");
     printOutput('Digite "comandos" para ver a lista de comandos.');
     printOutput("");
