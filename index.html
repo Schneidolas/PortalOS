@@ -11,13 +11,14 @@
             --background: #000000;
             --foreground: #c0c0c0;
             --font: 'VT323', monospace;
+            --editor-bg: #000080;
+            --editor-fg: #f0f0f0;
+            --statusbar-bg: #c0c0c0;
+            --statusbar-fg: #000000;
         }
 
         html, body {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
+            width: 100%; height: 100%; margin: 0; padding: 0;
             background-color: var(--background);
             color: var(--foreground);
             font-family: var(--font);
@@ -25,75 +26,47 @@
         }
 
         #terminal-container {
-            width: 100%;
-            height: 100%;
-            padding: 10px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            width: 100%; height: 100%; padding: 10px;
+            box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden;
         }
 
-        #output {
-            flex-grow: 1;
-            overflow-y: scroll;
-            white-space: pre-wrap;
-        }
-        
-        #output::-webkit-scrollbar {
-            width: 0;
-            background: transparent;
-        }
+        #output { flex-grow: 1; overflow-y: scroll; white-space: pre-wrap; }
+        #output::-webkit-scrollbar { width: 0; background: transparent; }
 
-        #input-line {
-            display: flex;
-            white-space: nowrap;
-        }
-
-        #prompt {
-            margin-right: 8px;
-        }
-
+        #input-line { display: flex; white-space: nowrap; }
+        #prompt { margin-right: 8px; }
         #input {
-            background: transparent;
-            border: none;
-            color: var(--foreground);
-            font-family: inherit;
-            font-size: inherit;
-            flex-grow: 1;
+            background: transparent; border: none; color: var(--foreground);
+            font-family: inherit; font-size: inherit; flex-grow: 1;
             caret-shape: block;
         }
-
-        #input:focus {
-            outline: none;
-        }
+        #input:focus { outline: none; }
         
-        /* ESTILOS DA IDE (para quando for reativada) */
-        .terminal-editor {
+        /* ESTILOS DA IDE */
+        .editor-view {
             position: absolute; top:0; left:0; right:0; bottom:0;
-            display: flex; flex-direction: column;
-            background: #000080;
+            display: flex; flex-direction: column; background: var(--editor-bg);
             z-index: 10;
         }
-        .editor-textarea { flex-grow: 1; background: #000080; color: #f0f0f0; border: none; resize: none; font-family: 'Courier New', Courier, monospace; font-size: 1.1em; padding: 5px; }
+        .editor-textarea { flex-grow: 1; background: var(--editor-bg); color: var(--editor-fg); border: none; resize: none; font-family: 'Courier New', Courier, monospace; font-size: 1.1em; padding: 5px; }
         .editor-textarea:focus { outline: none; }
-        .editor-statusbar { background: #c0c0c0; color: #000000; padding: 2px 5px; font-size: 0.9em; text-align: center; }
+        .editor-statusbar { background: var(--statusbar-bg); color: var(--statusbar-fg); padding: 2px 5px; font-size: 0.9em; text-align: center; }
     </style>
 </head>
 <body>
-    <!-- ESTRUTURA CORRETA DO TERMINAL AQUI -->
+    <!-- ESTRUTURA CORRETA DO TERMINAL DIRETAMENTE NA PÁGINA -->
     <div id="terminal-container" onclick="document.getElementById('input').focus()">
         <div id="output"></div>
         <div id="input-line">
             <span id="prompt"></span>
             <input type="text" id="input" autocomplete="off" autofocus>
         </div>
-        
-        <!-- Container para a IDE, oculto por padrão -->
-        <div id="editor-view" style="display:none;" class="terminal-editor">
-            <textarea id="editor-textarea"></textarea>
-            <div id="editor-statusbar"></div>
-        </div>
+    </div>
+    
+    <!-- Container para a IDE, oculto por padrão -->
+    <div id="editor-view" style="display:none;" class="editor-view">
+        <textarea id="editor-textarea"></textarea>
+        <div id="editor-statusbar"></div>
     </div>
     
     <script src="portal_os.js"></script>
