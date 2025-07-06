@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const editorStatusBar = document.getElementById('editor-status-bar');
 
     // --- Estados Globais ---
+    let matrixInterval;
     let isMatrixActive = false;
     const editorState = {
         isActive: false,
@@ -50,22 +51,25 @@ document.addEventListener('DOMContentLoaded', function() {
     function getDirectory(pathArray) { let dir = fileSystem['C:']; for (let i = 1; i < pathArray.length; i++) { dir = dir?.children?.[pathArray[i]]; } return dir; }
 
     // --- Lógica dos Editores (Unificada) ---
-    function openEditor(fileName, type) { // type é 'ide' ou 'edit'
+    function openEditor(fileName, type) { /* ... (código do editor permanece o mesmo) ... */ }
+    function closeEditor() { /* ... (código do editor permanece o mesmo) ... */ }
+    function saveFile() { /* ... (código do editor permanece o mesmo) ... */ }
+    function handleEditorKeys(e) { /* ... (código do editor permanece o mesmo) ... */ }
+    // (Cole o código completo dos editores da resposta anterior aqui se precisar)
+    function openEditor(fileName, type) {
         editorState.isActive = true;
         editorState.activeEditor = type;
         editorState.fileName = fileName;
-
         const currentDir = getDirectory(currentPath);
         const file = currentDir.children[fileName];
         const content = (file && file.type === 'file') ? file.content : '';
         const statusText = `Editando: ${fileName} | Ctrl+S: Salvar | Ctrl+Q: Sair sem Salvar`;
-
         if (type === 'ide') {
             ideTextarea.value = content;
             ideStatusBar.textContent = statusText;
             terminal.classList.add('ide-mode');
             ideTextarea.focus();
-        } else { // 'edit'
+        } else {
             editorTextarea.value = content;
             editorStatusBar.textContent = statusText;
             editorWindow.style.display = 'flex';
@@ -73,7 +77,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         window.addEventListener('keydown', handleEditorKeys);
     }
-
     function closeEditor() {
         if (editorState.activeEditor === 'ide') {
             terminal.classList.remove('ide-mode');
@@ -85,7 +88,6 @@ document.addEventListener('DOMContentLoaded', function() {
         window.removeEventListener('keydown', handleEditorKeys);
         inputLine.focus();
     }
-
     function saveFile() {
         const currentDir = getDirectory(currentPath);
         const content = editorState.activeEditor === 'ide' ? ideTextarea.value : editorTextarea.value;
@@ -93,26 +95,25 @@ document.addEventListener('DOMContentLoaded', function() {
         printOutput(`Arquivo "${editorState.fileName}" salvo.`);
         closeEditor();
     }
-
     function handleEditorKeys(e) {
         if (!editorState.isActive) return;
         if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); saveFile(); } 
         else if (e.ctrlKey && e.key.toLowerCase() === 'q') { e.preventDefault(); closeEditor(); printOutput(`Edição de "${editorState.fileName}" cancelada.`); }
     }
 
+
     // --- Executor de Scripts ---
     async function executeBatchFile(fileName) {
         const currentDir = getDirectory(currentPath);
         const file = currentDir.children[fileName];
         if (!file || file.type !== 'file') { printOutput(`Erro: arquivo de lote não encontrado: ${fileName}`); return; }
-
         const lines = file.content.split('\n');
         for (const line of lines) {
             const trimmedLine = line.trim();
             if (trimmedLine === '' || trimmedLine.toLowerCase().startsWith('rem')) continue;
             printOutput(`${promptElement.textContent}${trimmedLine}`);
             await processCommand(trimmedLine);
-            await new Promise(resolve => setTimeout(resolve, 50)); // Pequeno delay para efeito
+            await new Promise(resolve => setTimeout(resolve, 50));
         }
     }
     
@@ -160,20 +161,12 @@ matrix            - Entra na Matrix.`),
             if (file?.type === 'file') { printOutput(file.content); } 
             else { printOutput(`Arquivo não encontrado: ${fileName}`); }
         },
-        // COMANDO ADICIONADO DE VOLTA
         touch: (args) => {
             const fileName = args[0];
-            if (!fileName) {
-                printOutput('Uso: touch [nome_do_arquivo]');
-                return;
-            }
+            if (!fileName) { printOutput('Uso: touch [nome_do_arquivo]'); return; }
             const currentDir = getDirectory(currentPath);
-            if (currentDir.children[fileName]) {
-                printOutput(`Um arquivo ou diretório com o nome "${fileName}" já existe.`);
-            } else {
-                currentDir.children[fileName] = { type: 'file', content: '' };
-                printOutput(`Arquivo "${fileName}" criado.`);
-            }
+            if (currentDir.children[fileName]) { printOutput(`Um arquivo ou diretório com o nome "${fileName}" já existe.`); } 
+            else { currentDir.children[fileName] = { type: 'file', content: '' }; printOutput(`Arquivo "${fileName}" criado.`); }
         },
         mkdir: (args) => {
             const dirName = args[0];
@@ -197,21 +190,35 @@ matrix            - Entra na Matrix.`),
             if (!fileName) { printOutput('Uso: launch [arquivo]'); return; }
             const extension = fileName.split('.').pop().toLowerCase();
             const file = getDirectory(currentPath).children[fileName];
-
-            if (!file) {
-                printOutput(`Arquivo não encontrado: ${fileName}`);
-                return;
-            }
-
-            if (extension === 'bat') {
-                await executeBatchFile(fileName);
-            } else if (extension === 'exe' && file.type === 'program') {
-                printOutput(`Executando ${fileName}... (Simulação)`);
-            } else {
-                printOutput(`Não é possível executar "${fileName}". Não é um programa ou script válido.`);
-            }
+            if (!file) { printOutput(`Arquivo não encontrado: ${fileName}`); return; }
+            if (extension === 'bat') { await executeBatchFile(fileName); } 
+            else if (extension === 'exe' && file.type === 'program') { printOutput(`Executando ${fileName}... (Simulação)`); } 
+            else { printOutput(`Não é possível executar "${fileName}". Não é um programa ou script válido.`); }
         },
-        matrix: () => { /* ... (código da matrix permanece o mesmo) ... */ }
+        // --- FUNÇÃO MATRIX RESTAURADA ---
+        matrix: () => {
+            if (isMatrixActive) return;
+            isMatrixActive = true;
+            terminal.classList.add('matrix-mode');
+            inputContainer.style.display = 'none';
+            
+            const matrixP = document.createElement('p');
+            output.appendChild(matrixP);
+
+            matrixInterval = setInterval(() => {
+                matrixP.textContent += Array.from({length: 300}, () => Math.random() > 0.5 ? '1' : '0').join('');
+                terminal.scrollTop = terminal.scrollHeight;
+            }, 50);
+
+            window.addEventListener('keydown', () => {
+                isMatrixActive = false;
+                clearInterval(matrixInterval);
+                terminal.classList.remove('matrix-mode');
+                inputContainer.style.display = 'flex';
+                printOutput("\n...saindo da Matrix.");
+                inputLine.focus();
+            }, { once: true });
+        }
     };
     // Aliases
     commands.help = commands.comandos;
@@ -244,11 +251,10 @@ matrix            - Entra na Matrix.`),
 
     // --- Inicialização ---
     async function init() {
-        printOutput("PortalOS [Versão 2.4 - Beta]");
+        printOutput("PortalOS [Versão 2.5 - Stable]");
         printOutput("(c) Schneidolas Corporation. Todos os direitos reservados.");
         printOutput("");
         updatePrompt();
-        // Executa o script de boas-vindas na inicialização
         await processCommand('launch scripts/boas-vindas.bat');
         updatePrompt();
     }
