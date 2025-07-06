@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schneidolas Desktop Environment</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  
+  <div class="portal-container">
+      <main class="main-content" id="desktop">
+        <div id="desktop-icons-container">
+            <!-- Os ícones serão gerados aqui pelo JS -->
+        </div>
+      </main>
+
+      <div id="taskbar">
+        <button id="start-button">
+          <img src="https://win98icons.alexmeub.com/icons/png/windows-0.png" width="24" alt="Win">
+          <span>Iniciar</span>
+        </button>
+        <div id="taskbar-apps"></div>
+        <div id="digital-clock">00:00:00</div>
+      </div>
+  </div>
+
+  <!-- O Menu Iniciar será gerado pelo JS -->
+  <div id="start-menu" class="menu"></div>
+
+  <!-- O Menu de Contexto -->
+  <div id="context-menu" class="menu">
+    <ul>
+      <li id="reset-windows-btn">Resetar Posição das Janelas</li>
+      <div class="separator"></div>
+      <li>
+        <span>Papel de Parede</span>
+        <span class="submenu-arrow">►</span>
+        <ul class="submenu menu" id="wallpaper-menu">
+            <!-- Wallpapers serão preenchidos pelo JS -->
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Templates para Apps Nativos -->
+  <template id="template-terminal">
+    <div class="terminal-default-view">
+        <div class="terminal-output"></div>
+        <div class="terminal-input-line">
+            <span class="terminal-prompt">C:\></span><input type="text" class="terminal-input" autofocus>
+        </div>
+    </div>
+    <div class="terminal-editor" style="display:none;">
+      <textarea class="editor-textarea"></textarea>
+      <div class="editor-statusbar"></div>
+    </div>
+  </template>
+
+  <!-- Carrega os scripts do sistema NA ORDEM CORRETA -->
+  <script src="js/config.js"></script>
+  <script src="js/apps/terminal.js"></script>
+  <script src="js/main.js"></script>
+
+</body>
+</html>
