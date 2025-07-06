@@ -1,38 +1,7 @@
-body {
-    background-color: #008080;
-    font-family: 'VT323', monospace;
-    margin: 0;
-    overflow: hidden;
-}
-
-.window {
-    width: 100vw;
-    height: 100vh;
-    background-color: #c0c0c0;
-    border: 2px solid;
-    border-top-color: #ffffff;
-    border-left-color: #ffffff;
-    border-right-color: #404040;
-    border-bottom-color: #404040;
-    display: flex;
-    flex-direction: column;
-    padding: 3px;
-    box-sizing: border-box;
-}
-
-.title-bar {
-    background: linear-gradient(to right, #000080, #1084d0);
-    color: white;
-    padding: 3px 5px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 18px;
-    user-select: none;
-    flex-shrink: 0;
-}
-
-/* ... (código dos botões continua o mesmo) ... */
+/* ... (estilos de body, .window, .title-bar, .button continuam os mesmos) ... */
+body { background-color: #008080; font-family: 'VT323', monospace; margin: 0; overflow: hidden; }
+.window { width: 100vw; height: 100vh; background-color: #c0c0c0; border: 2px solid; border-top-color: #ffffff; border-left-color: #ffffff; border-right-color: #404040; border-bottom-color: #404040; display: flex; flex-direction: column; padding: 3px; box-sizing: border-box; }
+.title-bar { background: linear-gradient(to right, #000080, #1084d0); color: white; padding: 3px 5px; display: flex; justify-content: space-between; align-items: center; font-size: 18px; user-select: none; flex-shrink: 0; }
 .title-buttons { display: flex; }
 .button { width: 20px; height: 20px; background-color: #c0c0c0; border: 1px solid; border-top-color: #ffffff; border-left-color: #ffffff; border-right-color: #404040; border-bottom-color: #404040; margin-left: 3px; display: flex; justify-content: center; align-items: center; font-weight: bold; cursor: pointer; }
 .button:active { border-top-color: #404040; border-left-color: #404040; border-right-color: #ffffff; border-bottom-color: #ffffff; }
@@ -44,59 +13,54 @@ body {
     padding: 10px;
     overflow-y: auto;
     font-size: 22px;
-    line-height: 1.2;
     display: flex;
     flex-direction: column;
-    position: relative; /* Para a barra de status */
+    position: relative;
 }
 
-/* Modo Terminal Matrix */
-.terminal.matrix-mode {
-    color: #00ff00;
-}
-
-/* MODO EDITOR ESTILO CLÁSSICO */
-.terminal.editor-mode {
-    background-color: #0000AA; /* Fundo azul clássico */
-    color: #FFFFFF; /* Texto branco */
-    padding: 0;
-}
-.terminal.editor-mode #output,
-.terminal.editor-mode #input-container {
-    display: none; /* Esconde o terminal normal */
-}
-.terminal.editor-mode #editor-textarea,
-.terminal.editor-mode #status-bar {
-    display: block; /* Mostra os elementos do editor */
-}
-
-
+.terminal.matrix-mode { color: #00ff00; }
 #output { flex-grow: 1; }
 #output p { margin: 0; white-space: pre-wrap; word-break: break-all; }
 .input-container { display: flex; flex-shrink: 0; }
 #prompt { margin-right: 5px; }
 #input-line { flex-grow: 1; background-color: transparent; border: none; color: inherit; font-family: 'VT323', monospace; font-size: 22px; outline: none; }
 
-/* Elementos do Editor */
-#editor-textarea {
-    display: none;
-    flex-grow: 1;
-    background: transparent;
-    border: none;
-    color: inherit;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 18px;
-    padding: 8px;
-    resize: none;
-    outline: none;
-    line-height: 1.3;
+
+/* --- ESTILOS DA IDE ANTIGA (TELA AZUL) --- */
+.terminal.ide-mode {
+    background-color: #0000AA;
+    color: #FFFFFF;
+    padding: 0;
+}
+.terminal.ide-mode #output, .terminal.ide-mode #input-container { display: none; }
+.terminal.ide-mode #ide-textarea, .terminal.ide-mode #ide-status-bar { display: block; }
+
+#ide-textarea { display: none; flex-grow: 1; background: transparent; border: none; color: inherit; font-family: 'Courier New', Courier, monospace; font-size: 18px; padding: 8px; resize: none; outline: none; }
+#ide-status-bar { display: none; flex-shrink: 0; background-color: #c0c0c0; color: #000; padding: 3px 8px; font-size: 18px; }
+
+
+/* --- ESTILOS DA IDE MODERNA (JANELA FLUTUANTE) --- */
+.editor-window {
+    display: none; /* Escondido por padrão */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70%;
+    height: 70%;
+    max-width: 800px;
+    background-color: #c0c0c0;
+    border: 2px solid;
+    border-top-color: #ffffff;
+    border-left-color: #ffffff;
+    border-right-color: #404040;
+    border-bottom-color: #404040;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+    z-index: 100;
+    padding: 3px;
+    flex-direction: column;
 }
 
-#status-bar {
-    display: none;
-    flex-shrink: 0;
-    background-color: #c0c0c0;
-    color: #000;
-    padding: 3px 8px;
-    font-size: 18px;
-}
+.editor-title-bar { background: #000080; }
+#editor-status-bar { background-color: #c0c0c0; padding: 4px 8px; font-size: 18px; color: #000; border-bottom: 2px solid; border-top-color: #404040; border-left-color: #404040; border-right-color: #ffffff; border-bottom-color: #ffffff; }
+#editor-textarea { flex-grow: 1; width: 100%; box-sizing: border-box; border: 2px inset #808080; background: #fff; color: #000; font-family: 'Courier New', Courier, monospace; font-size: 16px; padding: 5px; resize: none; outline: none; }
