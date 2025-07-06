@@ -1,66 +1,84 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Schneidolas Desktop Environment</title>
-  <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PortalOS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+        :root {
+            --background: #000000;
+            --foreground: #c0c0c0;
+            --font: 'VT323', monospace;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background);
+            color: var(--foreground);
+            font-family: var(--font);
+            font-size: 18px;
+        }
+
+        #terminal-container {
+            width: 100%;
+            height: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #output {
+            flex-grow: 1;
+            overflow-y: scroll;
+            white-space: pre-wrap; /* Para quebrar linhas longas */
+        }
+        
+        /* Esconde a barra de scroll padrão, se desejado */
+        #output::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+
+        #input-line {
+            display: flex;
+            white-space: nowrap;
+        }
+
+        #prompt {
+            margin-right: 8px;
+        }
+
+        #input {
+            background: transparent;
+            border: none;
+            color: var(--foreground);
+            font-family: inherit;
+            font-size: inherit;
+            flex-grow: 1;
+            caret-shape: block;
+        }
+
+        #input:focus {
+            outline: none;
+        }
+    </style>
 </head>
 <body>
-  
-  <div class="portal-container">
-      <main class="main-content" id="desktop">
-        <div id="desktop-icons-container">
-            <!-- Os ícones serão gerados aqui pelo JS -->
-        </div>
-      </main>
-
-      <div id="taskbar">
-        <button id="start-button">
-          <img src="https://win98icons.alexmeub.com/icons/png/windows-0.png" width="24" alt="Win">
-          <span>Iniciar</span>
-        </button>
-        <div id="taskbar-apps"></div>
-        <div id="digital-clock">00:00:00</div>
-      </div>
-  </div>
-
-  <!-- O Menu Iniciar será gerado pelo JS -->
-  <div id="start-menu" class="menu"></div>
-
-  <!-- O Menu de Contexto -->
-  <div id="context-menu" class="menu">
-    <ul>
-      <li id="reset-windows-btn">Resetar Posição das Janelas</li>
-      <div class="separator"></div>
-      <li>
-        <span>Papel de Parede</span>
-        <span class="submenu-arrow">►</span>
-        <ul class="submenu menu" id="wallpaper-menu">
-            <!-- Wallpapers serão preenchidos pelo JS -->
-        </ul>
-      </li>
-    </ul>
-  </div>
-
-  <!-- Templates para Apps Nativos -->
-  <template id="template-terminal">
-    <div class="terminal-default-view">
-        <div class="terminal-output"></div>
-        <div class="terminal-input-line">
-            <span class="terminal-prompt">C:\></span><input type="text" class="terminal-input" autofocus>
+    <div id="terminal-container" onclick="document.getElementById('input').focus()">
+        <div id="output"></div>
+        <div id="input-line">
+            <span id="prompt"></span>
+            <input type="text" id="input" autocomplete="off" autofocus>
         </div>
     </div>
-    <div class="terminal-editor" style="display:none;">
-      <textarea class="editor-textarea"></textarea>
-      <div class="editor-statusbar"></div>
-    </div>
-  </template>
-
-  <!-- Carrega os scripts do sistema NA ORDEM CORRETA -->
-  <script src="js/config.js"></script>
-  <script src="js/apps/terminal.js"></script>
-  <script src="js/main.js"></script>
-
+    
+    <script src="portal_os.js"></script>
 </body>
 </html>
