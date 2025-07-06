@@ -192,20 +192,7 @@ else { }          - Bloco alternativo.
     commands.mkdir = (args) => { const dirName = args[0]; if (!dirName) { printOutput('Uso: mkdir [nome]'); return; } const currentDir = getDirectory(currentPath); if (currentDir.children[dirName]) { printOutput(`Um subdiretório ou arquivo ${dirName} já existe.`); } else { currentDir.children[dirName] = { type: 'directory', children: {} }; } };
     commands.ide = (args) => { const fileName = args[0]; if (!fileName) { printOutput('Uso: ide [nome_do_arquivo]'); return; } openEditor(fileName, 'ide'); };
     commands.edit = (args) => { const fileName = args[0]; if (!fileName) { printOutput('Uso: edit [nome_do_arquivo]'); return; } openEditor(fileName, 'edit'); };
-    commands.launch = async (args) => { const fileName = args[0]; if (!fileName) { printOutput('Uso: launch [arquivo]'); return; } const extension = fileName.split('.').pop().toLowerCase(); const file = getDirectory(currentPath).children[fileName]; if (!file) { printOutput(`Arquivo não encontrado: ${fileName}`); return; } if (extension === 'bat') { await executeBatchFile(fileName); } else if (extension === 'exe' && file.type === 'program') { printOutput(`Executando ${fileName}... (Simulação)`); } else { printOutput(`Não é possível executar "${fileName}". Não é um programa ou script válido.`); } };
-    commands.matrix = () => { if (isMatrixActive) return; isMatrixActive = true; terminal.classList.add('matrix-mode'); inputContainer.style.display = 'none'; const matrixP = document.createElement('p'); output.appendChild(matrixP); matrixInterval = setInterval(() => { matrixP.textContent += Array.from({length: 300}, () => Math.random() > 0.5 ? '1' : '0').join(''); terminal.scrollTop = terminal.scrollHeight; }, 50); window.addEventListener('keydown', () => { isMatrixActive = false; clearInterval(matrixInterval); terminal.classList.remove('matrix-mode'); inputContainer.style.display = 'flex'; printOutput("\n...saindo da Matrix."); inputLine.focus(); }, { once: true }); };
-    commands.help = commands.comandos;
-    commands.ajuda = commands.comandos;
-    commands.cls = commands.limpar;
-    commands.clear = commands.limpar;
-    commands.dir = commands.ls;
-
-    async function processCommand(fullCommand) { const parts = fullCommand.trim().split(' '); const command = parts[0].toLowerCase(); const args = parts.slice(1); if (command in commands) { await commands[command](args); } else if (command !== '') { printOutput(`'${command}' não é reconhecido como um comando interno.`); } }
-    inputLine.addEventListener('keydown', async (e) => { if (e.key !== 'Enter' || isMatrixActive || editorState.isActive) return; const commandToProcess = inputLine.value; printOutput(`${promptElement.textContent}${commandToProcess}`); inputLine.value = ''; await processCommand(commandToProcess); updatePrompt(); });
-    async function init() { printOutput("PortalOS [Versão 2.7 - Interactive Update]"); printOutput("(c) Schneidolas Corporation. Todos os direitos reservados."); printOutput(""); updatePrompt(); await processCommand('launch scripts/boas-vindas.bat'); updatePrompt(); }
-    init();
-
-     launch: async (args) => {
+    launch: async (args) => {
             const fileName = args[0];
             if (!fileName) { printOutput('Uso: launch [arquivo]'); return; }
 
@@ -239,4 +226,17 @@ else { }          - Bloco alternativo.
             inputLine.focus();
         },
     };
+    commands.matrix = () => { if (isMatrixActive) return; isMatrixActive = true; terminal.classList.add('matrix-mode'); inputContainer.style.display = 'none'; const matrixP = document.createElement('p'); output.appendChild(matrixP); matrixInterval = setInterval(() => { matrixP.textContent += Array.from({length: 300}, () => Math.random() > 0.5 ? '1' : '0').join(''); terminal.scrollTop = terminal.scrollHeight; }, 50); window.addEventListener('keydown', () => { isMatrixActive = false; clearInterval(matrixInterval); terminal.classList.remove('matrix-mode'); inputContainer.style.display = 'flex'; printOutput("\n...saindo da Matrix."); inputLine.focus(); }, { once: true }); };
+    commands.help = commands.comandos;
+    commands.ajuda = commands.comandos;
+    commands.cls = commands.limpar;
+    commands.clear = commands.limpar;
+    commands.dir = commands.ls;
+
+    async function processCommand(fullCommand) { const parts = fullCommand.trim().split(' '); const command = parts[0].toLowerCase(); const args = parts.slice(1); if (command in commands) { await commands[command](args); } else if (command !== '') { printOutput(`'${command}' não é reconhecido como um comando interno.`); } }
+    inputLine.addEventListener('keydown', async (e) => { if (e.key !== 'Enter' || isMatrixActive || editorState.isActive) return; const commandToProcess = inputLine.value; printOutput(`${promptElement.textContent}${commandToProcess}`); inputLine.value = ''; await processCommand(commandToProcess); updatePrompt(); });
+    async function init() { printOutput("PortalOS [Versão 2.7 - Interactive Update]"); printOutput("(c) Schneidolas Corporation. Todos os direitos reservados."); printOutput(""); updatePrompt(); await processCommand('launch scripts/boas-vindas.bat'); updatePrompt(); }
+    init();
+
+     
 });
