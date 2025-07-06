@@ -12,35 +12,30 @@
 <body>
 
     <div class="window">
-        <!-- Terminal Principal -->
         <div class="title-bar">
-            <div class="title-text">C:\ PortalOS Command Prompt</div>
+            <div class="title-text">C:\ PortalOS</div>
             <div class="title-buttons">
                 <div class="button minimize">_</div>
                 <div class="button maximize">[]</div>
                 <div class="button close">X</div>
             </div>
         </div>
-        <div class="terminal" id="terminal" onclick="document.getElementById('input-line').focus()">
+        <div class="terminal" id="terminal">
+            <!-- Conteúdo normal do terminal -->
             <div id="output"></div>
             <div class="input-container" id="input-container">
                 <span id="prompt">C:\></span>
                 <input type="text" id="input-line" autocomplete="off" autofocus>
             </div>
-        </div>
 
-        <!-- Janela do Editor (escondida por padrão) -->
-        <div id="editor-window" class="editor-window">
-             <div class="title-bar editor-title-bar">
-                <div class="title-text">PortalOS Editor</div>
-                <div class="title-buttons">
-                    <div class="button minimize">_</div>
-                    <div class="button maximize">[]</div>
-                    <div class="button close">X</div>
+            <!-- Conteúdo do Editor (escondido) -->
+            <div id="editor-container">
+                <div id="editor-main-area">
+                    <div id="editor-gutter"></div>
+                    <textarea id="editor-textarea"></textarea>
                 </div>
+                <div id="editor-status-bar"></div>
             </div>
-            <div id="editor-status-bar"></div>
-            <textarea id="editor-textarea"></textarea>
         </div>
     </div>
 
