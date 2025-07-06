@@ -1,30 +1,27 @@
 body {
-    background-color: #008080; /* Cor clássica do wallpaper do Windows 95 */
+    background-color: #008080;
     font-family: 'VT323', monospace;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
     margin: 0;
+    overflow: hidden; /* Evita barras de rolagem no body */
 }
 
 .window {
-    width: 800px;
-    height: 500px;
-    background-color: #c0c0c0; /* Cinza clássico */
+    width: 100vw;
+    height: 100vh;
+    background-color: #c0c0c0;
     border: 2px solid;
     border-top-color: #ffffff;
     border-left-color: #ffffff;
     border-right-color: #404040;
     border-bottom-color: #404040;
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
     display: flex;
     flex-direction: column;
     padding: 3px;
+    box-sizing: border-box; /* Garante que padding e border não aumentem o tamanho */
 }
 
 .title-bar {
-    background: linear-gradient(to right, #000080, #1084d0); /* Azul do título */
+    background: linear-gradient(to right, #000080, #1084d0);
     color: white;
     padding: 3px 5px;
     display: flex;
@@ -32,6 +29,7 @@ body {
     align-items: center;
     font-size: 18px;
     user-select: none;
+    flex-shrink: 0; /* Impede que a barra de título encolha */
 }
 
 .title-buttons {
@@ -69,15 +67,28 @@ body {
     overflow-y: auto;
     font-size: 22px;
     line-height: 1.2;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Estilo para o modo Matrix */
+.terminal.matrix-mode {
+    color: #00ff00;
+}
+
+#output {
+    flex-grow: 1;
 }
 
 #output p {
     margin: 0;
-    white-space: pre-wrap; /* Para quebra de linha e espaços funcionem */
+    white-space: pre-wrap;
+    word-break: break-all;
 }
 
 .input-container {
     display: flex;
+    flex-shrink: 0;
 }
 
 #prompt {
@@ -88,24 +99,66 @@ body {
     flex-grow: 1;
     background-color: transparent;
     border: none;
-    color: #c0c0c0;
+    color: inherit; /* Herda a cor do .terminal (cinza ou verde) */
     font-family: 'VT323', monospace;
     font-size: 22px;
     outline: none;
 }
 
-/* Esconde a tela da matrix por padrão */
-#matrix-screen {
-    display: none;
+/* --- Estilos do Editor de Texto --- */
+.editor-window {
+    display: none; /* Escondido por padrão */
     position: absolute;
-    top: 31px; /* Abaixo da barra de título */
-    left: 3px;
-    right: 3px;
-    bottom: 3px;
-    background: #000;
-    color: #00ff00; /* Verde matrix */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    height: 80%;
+    max-width: 800px;
+    background-color: #c0c0c0;
+    border: 2px solid;
+    border-top-color: #ffffff;
+    border-left-color: #ffffff;
+    border-right-color: #404040;
+    border-bottom-color: #404040;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+    z-index: 100;
+    padding: 3px;
+    flex-direction: column;
+}
+
+/* O título da janela do editor é ligeiramente diferente */
+.editor-title-bar .title-text {
+    color: #fff;
+    font-weight: bold;
+}
+.editor-title-bar {
+    background: #000080;
+}
+
+
+#editor-status-bar {
+    background-color: #c0c0c0;
+    padding: 4px 8px;
     font-size: 18px;
-    word-break: break-all;
-    overflow: hidden;
-    z-index: 10;
+    color: #000;
+    border-bottom: 2px solid;
+    border-top-color: #404040;
+    border-left-color: #404040;
+    border-right-color: #ffffff;
+    border-bottom-color: #ffffff;
+}
+
+#editor-textarea {
+    flex-grow: 1;
+    width: 100%;
+    box-sizing: border-box;
+    border: 2px inset #808080;
+    background: #fff;
+    color: #000;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 16px;
+    padding: 5px;
+    resize: none;
+    outline: none;
 }
