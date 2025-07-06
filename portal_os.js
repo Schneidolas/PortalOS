@@ -1,18 +1,15 @@
 class PortalOS {
-    // MUDANÇA: O init agora é um constructor, que roda automaticamente.
     constructor() {
-        // MUDANÇA: Usamos document.getElementById para pegar os elementos da página.
+        // CORREÇÃO: Busca os elementos diretamente do documento, pois eles agora existem.
         this.outputEl = document.getElementById('output');
         this.inputEl = document.getElementById('input');
         this.promptEl = document.getElementById('prompt');
         this.terminalContainer = document.getElementById('terminal-container');
         
-        // Elementos da IDE
         this.editorView = document.getElementById('editor-view');
         this.editorTextarea = document.getElementById('editor-textarea');
         this.editorStatusbar = document.getElementById('editor-statusbar');
         
-        // Estado
         this.isEditing = false;
         this.editingFile = { name: null, content: '' };
         this.matrixInterval = null;
@@ -20,19 +17,18 @@ class PortalOS {
         this.initVFS(); 
         this.updatePrompt();
 
-        this.appendLine("PortalOS [Versão 3.1 - Stable]");
+        this.appendLine("PortalOS [Versão 3.2 - Stable & Pure]");
         this.appendLine("(c) Schneidolas Corporation. Todos os direitos reservados.");
         this.appendLine("Digite 'comandos' para ajuda.");
         this.appendLine("");
 
-        // MUDANÇA: Os listeners são adicionados corretamente.
+        // CORREÇÃO: Os listeners agora são adicionados aos elementos corretos.
         this.inputEl.addEventListener('keydown', e => this.handleInput(e));
         this.editorTextarea.addEventListener('keydown', e => this.handleEditorKeys(e));
         
         this.inputEl.focus();
     }
 
-    // --- SISTEMA DE ARQUIVOS VIRTUAL (VFS) ---
     initVFS() {
         this.vfs = {
             'C:': { type: 'dir', children: {
@@ -46,7 +42,6 @@ class PortalOS {
         this.currentDirectory = ['C:'];
     }
     
-    // --- LÓGICA DO PROMPT E NAVEGAÇÃO ---
     updatePrompt() { this.promptEl.textContent = `${this.currentDirectory.join('\\')}>`; }
 
     resolvePath(path) {
@@ -70,15 +65,14 @@ class PortalOS {
         return node;
     }
 
-    // --- MANIPULAÇÃO DE ENTRADA ---
     handleInput(e) {
-        // Para o matrix se qualquer tecla for pressionada
         if (this.matrixInterval) {
+            e.preventDefault();
             clearInterval(this.matrixInterval);
             this.matrixInterval = null;
             this.outputEl.style.color = 'var(--foreground)';
             this.appendLine("\n...acordou.");
-            this.inputEl.value = ''; // Limpa o input
+            this.inputEl.value = '';
             return;
         }
         
@@ -95,13 +89,11 @@ class PortalOS {
         this.outputEl.innerHTML += text.replace(/</g, "<").replace(/>/g, ">") + '\n'; 
     }
     
-    // --- PROCESSAMENTO DE COMANDOS ---
     async processCommand(cmd) {
         const [command, ...args] = cmd.trim().split(' ');
         const argStr = args.join(' ');
         const currentNode = this.getNodeFromPath(this.currentDirectory);
 
-        // O switch continua o mesmo, com todos os seus comandos
         switch(command.toLowerCase()) {
             case 'comandos': case 'ajuda': case 'help':
                  const commandList = [
@@ -192,13 +184,12 @@ class PortalOS {
                 break;
             case 'limpar': case 'cls': this.outputEl.innerHTML = ''; break;
             case 'data': this.appendLine(new Date().toLocaleString('pt-BR')); break;
-            case 'ver': this.appendLine("Versão do PortalOS: 3.1"); break;
+            case 'ver': this.appendLine("Versão do PortalOS: 3.2"); break;
             case 'eco': this.appendLine(argStr); break;
             default: this.appendLine(`Comando ou nome de arquivo '${command}' não reconhecido.`);
         }
     },
     
-    // --- LÓGICA DA IDE ---
     enterEditMode(fileName, content) {
         this.isEditing = true;
         this.editingFile = { name: fileName, content: content };
@@ -224,7 +215,6 @@ class PortalOS {
         else if (e.ctrlKey && e.key.toLowerCase() === 'q') { e.preventDefault(); this.exitEditMode(false); }
     },
     
-    // --- NOVAS FUNÇÕES ---
     generateTree(node, prefix) {
         let result = [];
         const entries = Object.keys(node.children);
