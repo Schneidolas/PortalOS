@@ -1,0 +1,111 @@
+body {
+    background-color: #008080; /* Cor clássica do wallpaper do Windows 95 */
+    font-family: 'VT323', monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.window {
+    width: 800px;
+    height: 500px;
+    background-color: #c0c0c0; /* Cinza clássico */
+    border: 2px solid;
+    border-top-color: #ffffff;
+    border-left-color: #ffffff;
+    border-right-color: #404040;
+    border-bottom-color: #404040;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    padding: 3px;
+}
+
+.title-bar {
+    background: linear-gradient(to right, #000080, #1084d0); /* Azul do título */
+    color: white;
+    padding: 3px 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+    user-select: none;
+}
+
+.title-buttons {
+    display: flex;
+}
+
+.button {
+    width: 20px;
+    height: 20px;
+    background-color: #c0c0c0;
+    border: 1px solid;
+    border-top-color: #ffffff;
+    border-left-color: #ffffff;
+    border-right-color: #404040;
+    border-bottom-color: #404040;
+    margin-left: 3px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    cursor: pointer;
+}
+.button:active {
+    border-top-color: #404040;
+    border-left-color: #404040;
+    border-right-color: #ffffff;
+    border-bottom-color: #ffffff;
+}
+
+.terminal {
+    flex-grow: 1;
+    background-color: #000000;
+    color: #c0c0c0;
+    padding: 10px;
+    overflow-y: auto;
+    font-size: 22px;
+    line-height: 1.2;
+}
+
+#output p {
+    margin: 0;
+    white-space: pre-wrap; /* Para quebra de linha e espaços funcionem */
+}
+
+.input-container {
+    display: flex;
+}
+
+#prompt {
+    margin-right: 5px;
+}
+
+#input-line {
+    flex-grow: 1;
+    background-color: transparent;
+    border: none;
+    color: #c0c0c0;
+    font-family: 'VT323', monospace;
+    font-size: 22px;
+    outline: none;
+}
+
+/* Esconde a tela da matrix por padrão */
+#matrix-screen {
+    display: none;
+    position: absolute;
+    top: 31px; /* Abaixo da barra de título */
+    left: 3px;
+    right: 3px;
+    bottom: 3px;
+    background: #000;
+    color: #00ff00; /* Verde matrix */
+    font-size: 18px;
+    word-break: break-all;
+    overflow: hidden;
+    z-index: 10;
+}
