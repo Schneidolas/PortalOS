@@ -68,6 +68,40 @@
         #input:focus {
             outline: none;
         }
+
+        /* Adicione estas novas regras ao seu CSS no index.html */
+.terminal-editor {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background: #000080;
+}
+.editor-textarea {
+    flex-grow: 1;
+    background: #000080;
+    color: #f0f0f0;
+    border: none;
+    resize: none;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.1em;
+    padding: 5px;
+}
+.editor-textarea:focus { outline: none; }
+.editor-statusbar {
+    background: var(--cor-janela);
+    color: var(--cor-texto);
+    padding: 2px 5px;
+    font-size: 0.9em;
+    text-align: center;
+}
+.terminal-default-view { /* Garante que a tela do terminal preencha o espaço */
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background: black;
+}
     </style>
 </head>
 <body>
@@ -78,6 +112,22 @@
             <input type="text" id="input" autocomplete="off" autofocus>
         </div>
     </div>
+
+    <!-- Substitua o seu template-terminal por este no index.html -->
+<template id="template-terminal">
+    <!-- A UI da IDE, oculta por padrão -->
+    <div class="terminal-editor" style="display:none;">
+      <textarea class="editor-textarea"></textarea>
+      <div class="editor-statusbar"></div>
+    </div>
+    <!-- A UI normal do terminal -->
+    <div class="terminal-default-view">
+        <div class="terminal-output"></div>
+        <div class="terminal-input-line">
+            <span class="terminal-prompt">C:\></span><input type="text" class="terminal-input" autofocus>
+        </div>
+    </div>
+</template>
     
     <script src="portal_os.js"></script>
 </body>
