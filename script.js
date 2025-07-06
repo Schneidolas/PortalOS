@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
     // --- Elementos da UI e Estados Globais ---
-    // (Nenhuma mudança aqui, o código é o mesmo da resposta anterior)
     const terminal = document.getElementById('terminal');
     const output = document.getElementById('output');
     const inputContainer = document.getElementById('input-container');
@@ -15,6 +14,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let isMatrixActive = false;
     const editorState = { isActive: false, activeEditor: null, fileName: null };
     let currentPath = ['C:'];
+
+    // --- Sistema de Arquivos Virtual (com um novo script de exemplo) ---
     const fileSystem = {
         'C:': {
             type: 'directory',
@@ -26,72 +27,112 @@ document.addEventListener('DOMContentLoaded', function() {
                 'scripts': {
                     type: 'directory',
                     children: {
-                        'boas-vindas.bat': { type: 'file', content: '@echo off\neco Bem-vindo ao PortalOS!\n\neco Para ver os comandos, digite "help".\neco Para criar seu proprio script, digite "ide meu-script.bat"' }
+                        'boas-vindas.bat': { type: 'file', content: '@echo off\neco Bem-vindo ao PortalOS!\n\neco Para testar a nova interatividade, digite:\neco   launch scripts/cadastro.bat' },
+                        'cadastro.bat': { type: 'file', content: '@echo off\ncls\neco --- Cadastro de Novo Usuario ---\n\nset /p NOME=Digite seu nome: \nset /p CIDADE=Digite sua cidade: \n\neco\neco ---- Ficha de Cadastro ----\neco Nome....: %NOME%\neco Cidade..: %CIDADE%\neco ---------------------------\n' }
                     }
                 },
                 'README.txt': { type: 'file', content: 'Olá! Este é o sistema PortalOS.' }
             }
         }
     };
-    function printOutput(text) { /* ... */ }
-    function updatePrompt() { /* ... */ }
-    function getDirectory(pathArray) { /* ... */ }
-    function openEditor(fileName, type) { /* ... */ }
-    function closeEditor() { /* ... */ }
-    function saveFile() { /* ... */ }
-    function handleEditorKeys(e) { /* ... */ }
-    // Copie as funções auxiliares e dos editores da resposta anterior para cá
+    
+    // --- Funções Auxiliares e de Editor ---
+    // (Cole o código completo das funções da resposta anterior aqui)
+    function printOutput(text) { output.innerHTML += `<p>${text.replace(/</g, "<").replace(/>/g, ">")}</p>`; terminal.scrollTop = terminal.scrollHeight; }
+    function updatePrompt() { promptElement.textContent = `${currentPath.join('\\')}\\>`; }
+    function getDirectory(pathArray) { let dir = fileSystem['C:']; for (let i = 1; i < pathArray.length; i++) { dir = dir?.children?.[pathArray[i]]; } return dir; }
+    function openEditor(fileName, type) { editorState.isActive = true; editorState.activeEditor = type; editorState.fileName = fileName; const currentDir = getDirectory(currentPath); const file = currentDir.children[fileName]; const content = (file && file.type === 'file') ? file.content : ''; const statusText = `Editando: ${fileName} | Ctrl+S: Salvar | Ctrl+Q: Sair sem Salvar`; if (type === 'ide') { ideTextarea.value = content; ideStatusBar.textContent = statusText; terminal.classList.add('ide-mode'); ideTextarea.focus(); } else { editorTextarea.value = content; editorStatusBar.textContent = statusText; editorWindow.style.display = 'flex'; editorTextarea.focus(); } window.addEventListener('keydown', handleEditorKeys); }
+    function closeEditor() { if (editorState.activeEditor === 'ide') { terminal.classList.remove('ide-mode'); } else { editorWindow.style.display = 'none'; } editorState.isActive = false; editorState.activeEditor = null; window.removeEventListener('keydown', handleEditorKeys); inputLine.focus(); }
+    function saveFile() { const currentDir = getDirectory(currentPath); const content = editorState.activeEditor === 'ide' ? ideTextarea.value : editorTextarea.value; currentDir.children[editorState.fileName] = { type: 'file', content: content }; printOutput(`Arquivo "${editorState.fileName}" salvo.`); closeEditor(); }
+    function handleEditorKeys(e) { if (!editorState.isActive) return; if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); saveFile(); } else if (e.ctrlKey && e.key.toLowerCase() === 'q') { e.preventDefault(); closeEditor(); printOutput(`Edição de "${editorState.fileName}" cancelada.`); } }
 
-    // --- Executor de Scripts (ATUALIZADO) ---
+    // --- NOVO: Função para pegar input do usuário ---
+    function promptForInput(promptText) {
+        return new Promise((resolve) => {
+            promptElement.textContent = promptText;
+            inputContainer.style.visibility = 'visible'; // Garante que esteja visível
+            inputLine.focus();
+
+            const listener = (e) => {
+                if (e.key === 'Enter') {
+                    const userInput = inputLine.value;
+                    inputLine.value = '';
+                    inputLine.removeEventListener('keydown', listener);
+                    updatePrompt(); // Restaura o prompt normal
+                    printOutput(promptText + userInput); // Mostra o que o usuário digitou
+                    resolve(userInput);
+                }
+            };
+            inputLine.addEventListener('keydown', listener);
+        });
+    }
+
+    // --- Executor de Scripts (ATUALIZADO PARA VARIÁVEIS E INPUT) ---
     async function executeBatchFile(fileName) {
         const currentDir = getDirectory(currentPath);
         const file = currentDir.children[fileName];
-        if (!file || file.type !== 'file') {
-            printOutput(`Erro: arquivo de lote não encontrado: ${fileName}`);
-            return;
-        }
+        if (!file || file.type !== 'file') { printOutput(`Erro: arquivo de lote não encontrado: ${fileName}`); return; }
 
-        let batchEchoOn = true; // O "echo" começa ligado para cada script
+        const batchVariables = {}; // Armazena variáveis para este script
+        let batchEchoOn = true;
         const lines = file.content.split('\n');
 
-        for (const line of lines) {
+        inputContainer.style.visibility = 'hidden'; // Esconde o prompt principal durante a execução
+
+        for (let line of lines) {
+            // 1. Substituir variáveis (%VAR%)
+            line = line.replace(/%([^%]+)%/g, (match, varName) => {
+                return batchVariables[varName.toUpperCase()] || '';
+            });
+
             let trimmedLine = line.trim();
-            
-            // Ignora linhas vazias
             if (trimmedLine === '') continue;
 
-            // Checa por @echo off para mudar o estado
-            if (trimmedLine.toLowerCase() === '@echo off') {
-                batchEchoOn = false;
-                continue; // Pula para a próxima linha sem executar nada
+            const commandRaw = trimmedLine.split(' ')[0].toLowerCase();
+            let suppressThisLineEcho = trimmedLine.startsWith('@');
+            if (suppressThisLineEcho) {
+                trimmedLine = trimmedLine.substring(1);
             }
 
-            // Ignora comentários (REM)
-            if (trimmedLine.toLowerCase().startsWith('rem')) {
+            if (batchEchoOn && !suppressThisLineEcho) {
+                printOutput(`${promptElement.textContent}${line.trim()}`);
+            }
+
+            // 2. Comandos Especiais de Script
+            if (commandRaw === '@echo' && trimmedLine.toLowerCase().includes('off')) {
+                batchEchoOn = false;
+                continue;
+            }
+            if (commandRaw === 'rem') continue;
+            
+            if (commandRaw === 'set' && trimmedLine.toLowerCase().startsWith('set /p ')) {
+                const parts = trimmedLine.substring(7).split('=');
+                const varName = parts[0].trim().toUpperCase();
+                const promptText = parts.slice(1).join('=').trim();
+                const userInput = await promptForInput(promptText);
+                batchVariables[varName] = userInput;
                 continue;
             }
 
-            let commandToRun = trimmedLine;
-            let suppressThisLineEcho = false;
-            
-            // Checa pelo prefixo @ para suprimir o echo de uma única linha
-            if (commandToRun.startsWith('@')) {
-                suppressThisLineEcho = true;
-                commandToRun = commandToRun.substring(1);
+            if (commandRaw === 'set') {
+                const parts = trimmedLine.substring(4).split('=');
+                if (parts.length > 1) {
+                    const varName = parts[0].trim().toUpperCase();
+                    const value = parts.slice(1).join('=').trim();
+                    batchVariables[varName] = value;
+                }
+                continue;
             }
 
-            // Mostra o comando no terminal apenas se o echo estiver ligado
-            if (batchEchoOn && !suppressThisLineEcho) {
-                printOutput(`${promptElement.textContent}${trimmedLine}`);
-            }
-
-            // Executa o comando e espera um pouquinho
-            await processCommand(commandToRun);
+            // 3. Executar comando normal
+            await processCommand(trimmedLine);
             await new Promise(resolve => setTimeout(resolve, 50));
         }
+        inputContainer.style.visibility = 'visible'; // Restaura o prompt no final
+        inputLine.focus();
     }
-
-    // --- Definição dos Comandos (ATUALIZADO) ---
+    
+    // --- Definição dos Comandos (HELP ATUALIZADO) ---
     const commands = {
         comandos: () => printOutput(`==== LISTA DE COMANDOS DO PORTALOS ====
 ajuda/help/comandos - Exibe esta lista.
@@ -110,22 +151,12 @@ matrix            - Entra na Matrix.
 <br>-- Comandos de Script (.bat) --
 @echo off         - Esconde os comandos seguintes do script.
 rem [comentário]  - Adiciona um comentário que será ignorado.
-@comando          - Esconde apenas um comando específico.`),
-        // ... (o resto dos comandos: limpar, data, eco, ls, etc. continuam iguais)
-        // Cole o resto do objeto `commands` da resposta anterior aqui
+set VAR=VALOR     - Cria/modifica uma variável.
+set /p VAR=PROMPT - Pede para o usuário digitar algo e armazena em VAR.
+%VAR%             - Usa o valor de uma variável.`),
+        // ... (o resto dos comandos permanece igual)
     };
-    
-    // Cole o resto do script (aliases, processCommand, loop de entrada, init) aqui
-
-    // --- Colando o resto para garantir que está completo ---
-    function printOutput(text) { output.innerHTML += `<p>${text.replace(/</g, "<").replace(/>/g, ">")}</p>`; terminal.scrollTop = terminal.scrollHeight; }
-    function updatePrompt() { promptElement.textContent = `${currentPath.join('\\')}\\>`; }
-    function getDirectory(pathArray) { let dir = fileSystem['C:']; for (let i = 1; i < pathArray.length; i++) { dir = dir?.children?.[pathArray[i]]; } return dir; }
-    function openEditor(fileName, type) { editorState.isActive = true; editorState.activeEditor = type; editorState.fileName = fileName; const currentDir = getDirectory(currentPath); const file = currentDir.children[fileName]; const content = (file && file.type === 'file') ? file.content : ''; const statusText = `Editando: ${fileName} | Ctrl+S: Salvar | Ctrl+Q: Sair sem Salvar`; if (type === 'ide') { ideTextarea.value = content; ideStatusBar.textContent = statusText; terminal.classList.add('ide-mode'); ideTextarea.focus(); } else { editorTextarea.value = content; editorStatusBar.textContent = statusText; editorWindow.style.display = 'flex'; editorTextarea.focus(); } window.addEventListener('keydown', handleEditorKeys); }
-    function closeEditor() { if (editorState.activeEditor === 'ide') { terminal.classList.remove('ide-mode'); } else { editorWindow.style.display = 'none'; } editorState.isActive = false; editorState.activeEditor = null; window.removeEventListener('keydown', handleEditorKeys); inputLine.focus(); }
-    function saveFile() { const currentDir = getDirectory(currentPath); const content = editorState.activeEditor === 'ide' ? ideTextarea.value : editorTextarea.value; currentDir.children[editorState.fileName] = { type: 'file', content: content }; printOutput(`Arquivo "${editorState.fileName}" salvo.`); closeEditor(); }
-    function handleEditorKeys(e) { if (!editorState.isActive) return; if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); saveFile(); } else if (e.ctrlKey && e.key.toLowerCase() === 'q') { e.preventDefault(); closeEditor(); printOutput(`Edição de "${editorState.fileName}" cancelada.`); } }
-
+    // (Cole o resto do objeto `commands` e o resto do script da resposta anterior)
     commands.limpar = () => output.innerHTML = '';
     commands.data = () => printOutput(new Date().toLocaleString('pt-BR'));
     commands.eco = (args) => printOutput(args.join(' '));
@@ -146,6 +177,6 @@ rem [comentário]  - Adiciona um comentário que será ignorado.
 
     async function processCommand(fullCommand) { const parts = fullCommand.trim().split(' '); const command = parts[0].toLowerCase(); const args = parts.slice(1); if (command in commands) { await commands[command](args); } else if (command !== '') { printOutput(`'${command}' não é reconhecido como um comando interno.`); } }
     inputLine.addEventListener('keydown', async (e) => { if (e.key !== 'Enter' || isMatrixActive || editorState.isActive) return; const commandToProcess = inputLine.value; printOutput(`${promptElement.textContent}${commandToProcess}`); inputLine.value = ''; await processCommand(commandToProcess); updatePrompt(); });
-    async function init() { printOutput("PortalOS [Versão 2.6 - Scripting Update]"); printOutput("(c) Schneidolas Corporation. Todos os direitos reservados."); printOutput(""); updatePrompt(); await processCommand('launch scripts/boas-vindas.bat'); updatePrompt(); }
+    async function init() { printOutput("PortalOS [Versão 2.7 - Interactive Update]"); printOutput("(c) Schneidolas Corporation. Todos os direitos reservados."); printOutput(""); updatePrompt(); await processCommand('launch scripts/boas-vindas.bat'); updatePrompt(); }
     init();
 });
