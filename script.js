@@ -11,12 +11,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const editorTextarea = document.getElementById('editor-textarea');
     const editorStatusBar = document.getElementById('editor-status-bar');
     let matrixInterval;
-    let isMatrixActive = false;
+    let isMatrixActive = false, editorState = { isActive: false }, currentPath = ['C:'];
     const editorState = { isActive: false, activeEditor: null, fileName: null };
     let currentPath = ['C:'];
 
     // --- Sistema de Arquivos Virtual (com um novo script de exemplo) ---
-    const fileSystem = {
+     const fileSystem = {
         'C:': {
             type: 'directory',
             children: {
@@ -27,11 +27,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 'scripts': {
                     type: 'directory',
                     children: {
-                        'boas-vindas.bat': { type: 'file', content: '@echo off\neco Bem-vindo ao PortalOS!\n\neco Para testar a nova interatividade, digite:\neco   launch scripts/cadastro.bat' },
-                        'cadastro.bat': { type: 'file', content: '@echo off\ncls\neco --- Cadastro de Novo Usuario ---\n\nset /p NOME=Digite seu nome: \nset /p CIDADE=Digite sua cidade: \n\neco\neco ---- Ficha de Cadastro ----\neco Nome....: %NOME%\neco Cidade..: %CIDADE%\neco ---------------------------\n' }
+                        'boas-vindas.bat': { type: 'file', content: '@echo off\neco Bem-vindo ao PortalOS!\n\neco Para testar a nova linguagem, digite:\neco   launch scripts/quiz.scc' },
+                        'quiz.scc': {
+                            type: 'file',
+                            content: '@echo off\ncls\nprint >> Você gosta de maça ou banana?\nprint >> 1. Maça\nprint >> 2. Banana\n\nvar fruta\nimput >> fruta\n\nif (fruta == 1) {\n   print >> Maçã é ótima!\n} else {\n   print >> Banana é ótima!\n}\n\n%continue%'
+                        }
                     }
                 },
-                'README.txt': { type: 'file', content: 'Olá! Este é o sistema PortalOS.' }
             }
         }
     };
@@ -46,6 +48,22 @@ document.addEventListener('DOMContentLoaded', function() {
     function saveFile() { const currentDir = getDirectory(currentPath); const content = editorState.activeEditor === 'ide' ? ideTextarea.value : editorTextarea.value; currentDir.children[editorState.fileName] = { type: 'file', content: content }; printOutput(`Arquivo "${editorState.fileName}" salvo.`); closeEditor(); }
     function handleEditorKeys(e) { if (!editorState.isActive) return; if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); saveFile(); } else if (e.ctrlKey && e.key.toLowerCase() === 'q') { e.preventDefault(); closeEditor(); printOutput(`Edição de "${editorState.fileName}" cancelada.`); } }
 
+    function waitForSpace() {
+        return new Promise((resolve) => {
+            printOutput("Pressione a barra de espaço para continuar...");
+            const listener = (e) => {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    window.removeEventListener('keydown', listener);
+                    // Limpa a mensagem "Pressione espaço"
+                    output.removeChild(output.lastChild);
+                    resolve();
+                }
+            };
+            window.addEventListener('keydown', listener);
+        });
+    }
+    
     // --- NOVO: Função para pegar input do usuário ---
     function promptForInput(promptText) {
         return new Promise((resolve) => {
@@ -153,7 +171,14 @@ matrix            - Entra na Matrix.
 rem [comentário]  - Adiciona um comentário que será ignorado.
 set VAR=VALOR     - Cria/modifica uma variável.
 set /p VAR=PROMPT - Pede para o usuário digitar algo e armazena em VAR.
-%VAR%             - Usa o valor de uma variável.`),
+%VAR%             - Usa o valor de uma variável.
+<br>-- Nova Linguagem (.scc) --
+print >> [texto]  - Exibe texto na tela.
+var [nome]        - Declara uma variável.
+imput >> [var]    - Pede input e guarda em uma variável.
+if (cond) { }     - Bloco condicional.
+else { }          - Bloco alternativo.
+%continue%        - Pausa e espera a barra de espaço.`),
         // ... (o resto dos comandos permanece igual)
     };
     // (Cole o resto do objeto `commands` e o resto do script da resposta anterior)
@@ -179,4 +204,39 @@ set /p VAR=PROMPT - Pede para o usuário digitar algo e armazena em VAR.
     inputLine.addEventListener('keydown', async (e) => { if (e.key !== 'Enter' || isMatrixActive || editorState.isActive) return; const commandToProcess = inputLine.value; printOutput(`${promptElement.textContent}${commandToProcess}`); inputLine.value = ''; await processCommand(commandToProcess); updatePrompt(); });
     async function init() { printOutput("PortalOS [Versão 2.7 - Interactive Update]"); printOutput("(c) Schneidolas Corporation. Todos os direitos reservados."); printOutput(""); updatePrompt(); await processCommand('launch scripts/boas-vindas.bat'); updatePrompt(); }
     init();
+
+     launch: async (args) => {
+            const fileName = args[0];
+            if (!fileName) { printOutput('Uso: launch [arquivo]'); return; }
+
+            const extension = fileName.split('.').pop().toLowerCase();
+            const file = getDirectory(currentPath).children[fileName];
+
+            if (!file) { printOutput(`Arquivo não encontrado: ${fileName}`); return; }
+
+            // Esconde o prompt principal durante a execução de scripts
+            inputContainer.style.visibility = 'hidden';
+
+            if (extension === 'scc') {
+                const api = {
+                    printOutput: printOutput,
+                    promptForInput: promptForInput,
+                    waitForSpace: waitForSpace,
+                    cls: commands.limpar,
+                    prompt: promptElement.textContent // Passa o prompt atual para o echo
+                };
+                await window.sccInterpreter.execute(file.content, api);
+            } else if (extension === 'bat') {
+                await executeBatchFile(fileName);
+            } else if (extension === 'exe' && file.type === 'program') {
+                printOutput(`Executando ${fileName}... (Simulação)`);
+            } else {
+                printOutput(`Não é possível executar "${fileName}".`);
+            }
+            
+            // Reexibe o prompt no final
+            inputContainer.style.visibility = 'visible';
+            inputLine.focus();
+        },
+    };
 });
