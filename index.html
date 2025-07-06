@@ -37,10 +37,9 @@
         #output {
             flex-grow: 1;
             overflow-y: scroll;
-            white-space: pre-wrap; /* Para quebrar linhas longas */
+            white-space: pre-wrap;
         }
         
-        /* Esconde a barra de scroll padrão, se desejado */
         #output::-webkit-scrollbar {
             width: 0;
             background: transparent;
@@ -68,58 +67,34 @@
         #input:focus {
             outline: none;
         }
-
-        /* Adicione estas novas regras ao seu CSS no index.html */
-.terminal-editor {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-    background: #000080;
-}
-.editor-textarea {
-    flex-grow: 1;
-    background: #000080;
-    color: #f0f0f0;
-    border: none;
-    resize: none;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 1.1em;
-    padding: 5px;
-}
-.editor-textarea:focus { outline: none; }
-.editor-statusbar {
-    background: var(--cor-janela);
-    color: var(--cor-texto);
-    padding: 2px 5px;
-    font-size: 0.9em;
-    text-align: center;
-}
-.terminal-default-view { /* Garante que a tela do terminal preencha o espaço */
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-    background: black;
-}
+        
+        /* ESTILOS DA IDE (para quando for reativada) */
+        .terminal-editor {
+            position: absolute; top:0; left:0; right:0; bottom:0;
+            display: flex; flex-direction: column;
+            background: #000080;
+            z-index: 10;
+        }
+        .editor-textarea { flex-grow: 1; background: #000080; color: #f0f0f0; border: none; resize: none; font-family: 'Courier New', Courier, monospace; font-size: 1.1em; padding: 5px; }
+        .editor-textarea:focus { outline: none; }
+        .editor-statusbar { background: #c0c0c0; color: #000000; padding: 2px 5px; font-size: 0.9em; text-align: center; }
     </style>
 </head>
 <body>
-
-<template id="template-terminal">
-    <!-- A UI da IDE, oculta por padrão -->
-    <div class="terminal-editor" style="display:none;">
-      <textarea class="editor-textarea"></textarea>
-      <div class="editor-statusbar"></div>
-    </div>
-    <!-- A UI normal do terminal -->
-    <div class="terminal-default-view">
-        <div class="terminal-output"></div>
-        <div class="terminal-input-line">
-            <span class="terminal-prompt">C:\></span><input type="text" class="terminal-input" autofocus>
+    <!-- ESTRUTURA CORRETA DO TERMINAL AQUI -->
+    <div id="terminal-container" onclick="document.getElementById('input').focus()">
+        <div id="output"></div>
+        <div id="input-line">
+            <span id="prompt"></span>
+            <input type="text" id="input" autocomplete="off" autofocus>
+        </div>
+        
+        <!-- Container para a IDE, oculto por padrão -->
+        <div id="editor-view" style="display:none;" class="terminal-editor">
+            <textarea id="editor-textarea"></textarea>
+            <div id="editor-statusbar"></div>
         </div>
     </div>
-</template>
     
     <script src="portal_os.js"></script>
 </body>
