@@ -12,6 +12,7 @@
 <body>
 
     <div class="window">
+        <!-- Terminal Principal -->
         <div class="title-bar">
             <div class="title-text">PortalOS</div>
             <div class="title-buttons">
@@ -20,19 +21,32 @@
                 <div class="button close">X</div>
             </div>
         </div>
-
         <div class="terminal" id="terminal">
-            <!-- Conteúdo normal do terminal -->
+            <!-- Conteúdo do Terminal -->
             <div id="output"></div>
             <div class="input-container" id="input-container">
                 <span id="prompt">C:\></span>
                 <input type="text" id="input-line" autocomplete="off" autofocus>
             </div>
 
-            <!-- Elementos do Editor (escondidos) -->
-            <textarea id="editor-textarea"></textarea>
-            <div id="status-bar"></div>
+            <!-- Elementos da IDE Antiga (tela cheia) -->
+            <textarea id="ide-textarea"></textarea>
+            <div id="ide-status-bar"></div>
         </div>
+    </div>
+    
+    <!-- Janela da IDE Moderna (flutuante) -->
+    <div id="editor-window" class="editor-window">
+        <div class="title-bar editor-title-bar">
+            <div class="title-text">PortalOS Editor</div>
+            <div class="title-buttons">
+                <div class="button minimize">_</div>
+                <div class="button maximize">[]</div>
+                <div class="button close">X</div>
+            </div>
+        </div>
+        <div id="editor-status-bar"></div>
+        <textarea id="editor-textarea"></textarea>
     </div>
 
     <script src="script.js"></script>
