@@ -124,6 +124,7 @@ launch [app]      - Executa um arquivo (.bat, .exe).
 ls / dir          - Lista arquivos e diretórios.
 cd [caminho]      - Muda de diretório. ("cd .." volta).
 mkdir [nome]      - Cria um diretório.
+touch [arquivo]   - Cria um arquivo de texto vazio.
 cat [arquivo]     - Mostra o conteúdo de um arquivo.
 ide [arquivo]     - Abre o editor de tela cheia (azul).
 edit [arquivo]    - Abre o editor em janela (moderno).
@@ -159,6 +160,21 @@ matrix            - Entra na Matrix.`),
             if (file?.type === 'file') { printOutput(file.content); } 
             else { printOutput(`Arquivo não encontrado: ${fileName}`); }
         },
+        // COMANDO ADICIONADO DE VOLTA
+        touch: (args) => {
+            const fileName = args[0];
+            if (!fileName) {
+                printOutput('Uso: touch [nome_do_arquivo]');
+                return;
+            }
+            const currentDir = getDirectory(currentPath);
+            if (currentDir.children[fileName]) {
+                printOutput(`Um arquivo ou diretório com o nome "${fileName}" já existe.`);
+            } else {
+                currentDir.children[fileName] = { type: 'file', content: '' };
+                printOutput(`Arquivo "${fileName}" criado.`);
+            }
+        },
         mkdir: (args) => {
             const dirName = args[0];
             if (!dirName) { printOutput('Uso: mkdir [nome]'); return; }
@@ -180,12 +196,19 @@ matrix            - Entra na Matrix.`),
             const fileName = args[0];
             if (!fileName) { printOutput('Uso: launch [arquivo]'); return; }
             const extension = fileName.split('.').pop().toLowerCase();
+            const file = getDirectory(currentPath).children[fileName];
+
+            if (!file) {
+                printOutput(`Arquivo não encontrado: ${fileName}`);
+                return;
+            }
+
             if (extension === 'bat') {
                 await executeBatchFile(fileName);
-            } else if (extension === 'exe') {
+            } else if (extension === 'exe' && file.type === 'program') {
                 printOutput(`Executando ${fileName}... (Simulação)`);
             } else {
-                printOutput(`Extensão de arquivo não suportada para execução: .${extension}`);
+                printOutput(`Não é possível executar "${fileName}". Não é um programa ou script válido.`);
             }
         },
         matrix: () => { /* ... (código da matrix permanece o mesmo) ... */ }
@@ -221,7 +244,7 @@ matrix            - Entra na Matrix.`),
 
     // --- Inicialização ---
     async function init() {
-        printOutput("PortalOS [Versão 2.3 - Alpha]");
+        printOutput("PortalOS [Versão 2.4 - Beta]");
         printOutput("(c) Schneidolas Corporation. Todos os direitos reservados.");
         printOutput("");
         updatePrompt();
